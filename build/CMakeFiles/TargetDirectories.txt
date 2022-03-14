@@ -1,0 +1,4 @@
+/mnt/d/S6/PMP/TP/matrix/build/CMakeFiles/edit_cache.dir
+/mnt/d/S6/PMP/TP/matrix/build/CMakeFiles/testMatrix.dir
+/mnt/d/S6/PMP/TP/matrix/build/CMakeFiles/rebuild_cache.dir
+/mnt/d/S6/PMP/TP/matrix/build/CMakeFiles/googletest1.dir

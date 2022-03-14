@@ -1,0 +1,375 @@
+#ifndef MAT_MATRIX_H
+#define MAT_MATRIX_H
+
+namespace mat {
+  enum class MatrixOrdering {
+    RowMajor,
+    ColMajor,
+  };
+
+  template<typename Type, int RowCount, int ColCount, MatrixOrdering order = MatrixOrdering::RowMajor>
+  class Matrix {
+  public:
+    // Rows count
+    static constexpr int Rows = RowCount;
+
+    // Columns count
+    static constexpr int Cols = ColCount;
+
+    // Elements count
+    static constexpr int Size = RowCount * ColCount;
+
+    // Matrix order
+    static constexpr MatrixOrdering Order = order;
+
+    // Matrix elements
+    std::vector<std::vector<Type>> Elements;
+
+    // Default constructor
+    constexpr Matrix() {
+      if (Order == MatrixOrdering::RowMajor) {
+        Elements.resize(RowCount);
+        for (int i = 0; i < Rows; i++) {
+          for (int j = 0; j < Cols; j++) {
+            Elements[i].push_back(0);
+          }
+        }
+      } else {
+        Elements.resize(ColCount);
+        for (int i = 0; i < Cols; i++) {
+          for (int j = 0; j < Rows; j++) {
+            Elements[i].push_back(0);
+          }
+        }
+      }
+    }
+
+    // Initialisation constructor
+    template<int DataLength>
+    constexpr Matrix(const Type(&data)[DataLength]) {
+      int index = 0;
+      if (Order == MatrixOrdering::RowMajor) {
+        Elements.resize(RowCount);
+        for (int i = 0; i < Rows; i++) {
+          for (int j = 0; j < Cols; j++) {
+            Elements[i].push_back(data[index]);
+            ++index;
+          }
+        }
+      } else {
+        Elements.resize(ColCount);
+        for (int i = 0; i < Cols; i++) {
+          for (int j = 0; j < Rows; j++) {
+            Elements[i].resize(Rows);
+            Elements[i].push_back(data[index]);
+            ++index;
+          }
+        }
+      }
+    }
+
+    // // Conversion constructor
+    // constexpr Matrix(const Matrix<Type, Rows, Cols, Order>& other) {
+    // }
+
+    // // Affectation from a matrix with different ordering
+    // constexpr auto& operator=(const Matrix<Type, Rows, Cols, Order>& other) {
+    // }
+
+    // // Retrun the transposed matrix
+    // constexpr Matrix<Type, Cols, Rows, Order> transpose() {
+    // }
+
+    // Get the value at specified row and col
+    constexpr const Type& operator() (int row, int col) const {
+      if(Order == MatrixOrdering::RowMajor) {
+        return Elements[row][col];
+      } else {
+        return Elements[col][row];
+      }
+    }
+
+    constexpr Type& operator() (int row, int col) {
+      if(Order == MatrixOrdering::RowMajor) {
+        return Elements[row][col];
+      } else {
+        return Elements[col][row];
+      }
+    }
+
+    // // Addition - in place
+    // template<typename OtherType, MatrixOrdering otherOrder>
+    // auto& operator+=(const Matrix<OtherType, Rows, Cols, otherOrder>& other) {
+    // }
+
+    // // Addition - classic
+    // template<typename OtherType, MatrixOrdering otherOrder>
+    // constexpr Matrix<std::common_type_t<Type, OtherType>, Rows, Cols, Order> operator+(const Matrix<OtherType, Rows, Cols, otherOrder>& other) const {
+    // }
+
+    // // Substration - in place
+    // template<typename OtherType, MatrixOrdering otherOrder>
+    // auto& operator-=(const Matrix<OtherType, Rows, Cols, otherOrder>& other) {
+    // }
+
+    // // Substraction - classic
+    // template<typename OtherType, MatrixOrdering otherOrder>
+    // constexpr Matrix<std::common_type_t<Type, OtherType>, Rows, Cols, Order> operator-(const Matrix<OtherType, Rows, Cols, otherOrder>& other) const {
+    // }
+
+    // // Product - in place
+    // template<typename OtherType, MatrixOrdering otherOrder>
+    // auto& operator*=(const Matrix<OtherType, Rows, Cols, otherOrder>& other) {
+    //   Matrix<Type, Rows, Cols, Order> tmp;
+    //   tmp = *this * other;
+
+    //   *this = tmp;
+
+    //   return *this;
+    // }
+
+    // // Product - classic
+    // template<typename OtherType, int OtherCols, MatrixOrdering otherOrder>
+    // constexpr Matrix<std::common_type_t<Type, OtherType>, Rows, OtherCols, Order> operator*(const Matrix<OtherType, Cols, OtherCols, otherOrder>& other) const {
+    // }
+
+    // // Equality
+    // template<typename OtherType, int OtherRows, int OtherCols, MatrixOrdering otherOrder>
+    // constexpr bool operator==(const Matrix<OtherType, OtherRows, OtherCols, otherOrder>& other) const {
+    // }
+
+    // // Difference
+    // template<typename OtherType, int OtherRows, int OtherCols, MatrixOrdering otherOrder>
+    // constexpr bool operator!=(const Matrix<OtherType, OtherRows, OtherCols, otherOrder>& other) const {
+    // }
+
+  public:
+    /**
+     * Define here the iterator classe
+     * iterator must be allow to modify the values
+     * const_iterator must be point to constant value
+     */
+    struct iterator
+    {
+      using value_type = Type;
+
+      using difference_type = std::ptrdiff_t;
+
+      using pointer = Type*;
+
+      using reference = Type&;
+
+      using iterator_category = std::random_access_iterator_tag;
+
+      using type = Matrix<Type, RowCount, ColCount, order>;
+
+      constexpr iterator(Matrix<Type, RowCount, ColCount, order>& matrix, int row, int col) : m_matrix(matrix), m_row(row), m_col(col) {}
+
+      constexpr iterator(const iterator& other) : m_matrix(other.m_matrix), m_row(other.m_row), m_col(other.m_col) {}
+
+      constexpr iterator& operator=(const iterator& other) {
+        m_matrix = other.m_matrix;
+        m_row = other.m_row;
+        m_col = other.m_col;
+        return *this;
+      }
+
+      constexpr iterator& operator++() {
+        if (Order == MatrixOrdering::RowMajor) {
+          if (m_col < Cols - 1) {
+            ++m_col;
+          } else {
+            m_col = 0;
+            ++m_row;
+          }
+        } else {
+          if (m_row < Rows - 1) {
+            ++m_row;
+          } else {
+            m_row = 0;
+            ++m_col;
+          }
+        }
+        return *this;
+      }
+
+      constexpr iterator operator++(int) {
+        iterator tmp(*this);
+        ++(*this);
+        return tmp;
+      }
+
+      constexpr iterator& operator--() {
+        if (Order == MatrixOrdering::RowMajor) {
+          if (m_col > 0) {
+            --m_col;
+          } else {
+            m_col = Cols - 1;
+            --m_row;
+          }
+        } else {
+          if (m_row > 0) {
+            --m_row;
+          } else {
+            m_row = Rows - 1;
+            --m_col;
+          }
+        }
+        return *this;
+      }
+
+      constexpr iterator operator--(int) {
+        iterator tmp(*this);
+        --(*this);
+        return tmp;
+      }
+
+      constexpr iterator& operator+=(difference_type n) {
+        if (Order == MatrixOrdering::RowMajor) {
+          m_col += n;
+          if (m_col >= Cols) {
+            m_col -= Cols;
+            ++m_row;
+          }
+        } else {
+          m_row += n;
+          if (m_row >= Rows) {
+            m_row -= Rows;
+            ++m_col;
+          }
+        }
+        return *this;
+      }
+
+      constexpr iterator operator+(difference_type n) const {
+        iterator tmp(*this);
+        tmp += n;
+        return tmp;
+      }
+
+      constexpr iterator& operator-=(difference_type n) {
+        if (Order == MatrixOrdering::RowMajor) {
+          m_col -= n;
+          if (m_col < 0) {
+            m_col += Cols;
+            --m_row;
+          }
+        } else {
+          m_row -= n;
+          if (m_row < 0) {
+            m_row += Rows;
+            --m_col;
+          }
+        }
+        return *this;
+      }
+
+      constexpr iterator operator-(difference_type n) const {
+        iterator tmp(*this);
+        tmp -= n;
+        return tmp;
+      }
+
+      constexpr difference_type operator-(const iterator& other) const {
+        if (Order == MatrixOrdering::RowMajor) {
+          return m_col - other.m_col + (m_row - other.m_row) * Cols;
+        } else {
+          return m_row - other.m_row + (m_col - other.m_col) * Rows;
+        }
+      }
+
+      constexpr reference operator*() const {
+        return m_matrix(m_row, m_col);
+      }
+
+      constexpr pointer operator->() const {
+        return &m_matrix(m_row, m_col);
+      }
+
+      constexpr bool operator==(const iterator& other) const {
+        return m_matrix == other.m_matrix && m_row == other.m_row && m_col == other.m_col;
+      }
+
+      constexpr bool operator!=(const iterator& other) const {
+        return !(*this == other);
+      }
+
+      constexpr bool operator<(const iterator& other) const {
+        if (Order == MatrixOrdering::RowMajor) {
+          return m_row < other.m_row || (m_row == other.m_row && m_col < other.m_col);
+        } else {
+          return m_col < other.m_col || (m_col == other.m_col && m_row < other.m_row);
+        }
+      }
+
+      constexpr bool operator>(const iterator& other) const {
+        return other < *this;
+      }
+
+      constexpr bool operator<=(const iterator& other) const {
+        return !(other < *this);
+      }
+
+      constexpr bool operator>=(const iterator& other) const {
+        return !(*this < other);
+      }
+
+      constexpr reference operator[](difference_type n) const {
+        return *(*this + n);
+      }
+
+      ~iterator() {
+        m_matrix = nullptr;
+      }
+
+      Matrix<Type, RowCount, ColCount, order>& m_matrix;
+
+      int m_row;
+
+      int m_col;
+
+      friend class Matrix;
+    };
+
+
+    constexpr iterator begin() {
+      return iterator(this* , 0, 0);
+    }
+
+    constexpr iterator end() {
+      return iterator(this* , Rows, Cols);
+    }
+
+    // constexpr const_iterator begin() const {
+    //   return const_iterator();
+    // }
+
+    // constexpr const_iterator end() const {
+    //   return const_iterator(this, Rows, Cols);
+    // }
+
+
+  // /**
+  //  * Define here the VecR and VecC classes
+  //  */
+
+  // template<typename Type, int Cols>
+  // constexpr VecR<Type, Cols> vecRow(const Type(&data)[Cols]) {
+  // }
+
+  // template<typename Type, int Rows>
+  // constexpr VecC<Type, Rows> vecCol(const Type(&data)[Rows]) {
+  // }
+
+  // // Convert the matrix to the opposite ordering
+  // template<typename Type, int Rows, int Cols, MatrixOrdering Order>
+  // constexpr auto convert(const Matrix<Type, Rows, Cols, Order>& mat) {
+  // }
+
+  // // Retrun the identity matrix
+  // template<typename Type, int Size>
+  // constexpr Matrix<Type, Size, Size> identity() {
+  };
+}
+
+#endif // MAT_MATRIX_H

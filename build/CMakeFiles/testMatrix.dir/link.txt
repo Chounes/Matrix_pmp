@@ -1,0 +1,1 @@
+/usr/bin/c++    -fsanitize=address,undefined CMakeFiles/testMatrix.dir/testMatrix.cc.o  -o testMatrix  libgoogletest1.a -lpthread 
