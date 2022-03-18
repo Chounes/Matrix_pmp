@@ -133,15 +133,29 @@ namespace mat {
     // constexpr Matrix<std::common_type_t<Type, OtherType>, Rows, OtherCols, Order> operator*(const Matrix<OtherType, Cols, OtherCols, otherOrder>& other) const {
     // }
 
-    // // Equality
-    // template<typename OtherType, int OtherRows, int OtherCols, MatrixOrdering otherOrder>
-    // constexpr bool operator==(const Matrix<OtherType, OtherRows, OtherCols, otherOrder>& other) const {
-    // }
+     // Equality
+     template<typename OtherType, int OtherRows, int OtherCols, MatrixOrdering otherOrder>
+     constexpr bool operator==(const Matrix<OtherType, OtherRows, OtherCols, otherOrder>& other) const {
+       if (Rows != other.Rows || Cols != other.Cols) {
+         return false;
+       }
+
+       for (int i = 0; i < Rows; i++) {
+         for (int j = 0; j < Cols; j++) {
+           if (Elements[i][j] != other.Elements[i][j]) {
+             return false;
+           }
+         }
+       }
+
+       return true;
+     }
 
     // // Difference
-    // template<typename OtherType, int OtherRows, int OtherCols, MatrixOrdering otherOrder>
-    // constexpr bool operator!=(const Matrix<OtherType, OtherRows, OtherCols, otherOrder>& other) const {
-    // }
+     template<typename OtherType, int OtherRows, int OtherCols, MatrixOrdering otherOrder>
+     constexpr bool operator!=(const Matrix<OtherType, OtherRows, OtherCols, otherOrder>& other) const {
+       return !(*this == other);
+     }
 
   public:
     /**
@@ -319,7 +333,7 @@ namespace mat {
       }
 
       ~iterator() {
-        m_matrix = nullptr;
+//        m_matrix = nullptr;
       }
 
       Matrix<Type, RowCount, ColCount, order>& m_matrix;
@@ -333,11 +347,11 @@ namespace mat {
 
 
     constexpr iterator begin() {
-      return iterator(this* , 0, 0);
+      return iterator(*this, 0, 0);
     }
 
     constexpr iterator end() {
-      return iterator(this* , Rows, Cols);
+      return iterator(*this, Rows, 0);
     }
 
     // constexpr const_iterator begin() const {
