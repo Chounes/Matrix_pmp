@@ -2,6 +2,8 @@
 
 #include "Matrix.h"
 
+
+
 TEST(CreationAdnGetters, MatrixCreation) {
   mat::Matrix<int, 2, 2> m0;
   EXPECT_EQ(m0(0, 0), 0);
@@ -53,6 +55,8 @@ TEST(CreationAdnGetters, MatrixCreation) {
    }
    EXPECT_EQ(i, 100);
  }
+
+
 
 int main(int argc, char* argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
