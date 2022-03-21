@@ -594,17 +594,28 @@ namespace mat {
      }
 
 
-  // /**
-  //  * Define here the VecR and VecC classes
-  //  */
+   /**
+    * Define here the VecR and VecC classes
+    */
 
-  // template<typename Type, int Cols>
-  // constexpr VecR<Type, Cols> vecRow(const Type(&data)[Cols]) {
-  // }
+    template<typename T, int Cols>
+    using VecR = Matrix<T, 1, Cols>;
 
-  // template<typename Type, int Rows>
-  // constexpr VecC<Type, Rows> vecCol(const Type(&data)[Rows]) {
-  // }
+    template<typename T, int Rows>
+    using VecC = Matrix<T, Rows, 1>;
+
+
+
+
+   template<typename T, int Cols>
+   constexpr VecR<T, Cols> vecRow(const Type(&data)[Cols]) {
+     return VecR<T, Cols>(data);
+   }
+
+   template<typename T, int Rows>
+   constexpr VecC<T, Rows> vecCol(const Type(&data)[Rows]) {
+     return VecC<T, Rows>(data);
+   }
 
   // // Convert the matrix to the opposite ordering
   // template<typename Type, int Rows, int Cols, MatrixOrdering Order>
