@@ -198,6 +198,42 @@ TEST(CreationAdnGetters, MatrixCreation) {
     EXPECT_EQ((mat::identity<int, 4>()), i1);
  }
 
+ TEST(OperationTest, MatrixAdditionRowColDifferent){
+    mat::Matrix<int, 2, 2> m0({1, 2, 3, 4});
+    mat::Matrix<int, 2, 2, mat::MatrixOrdering::ColMajor> m1({1, 2, 3, 4});
+    mat::Matrix<int, 2, 2> m2({2, 5, 5, 8});
+    EXPECT_EQ(m0 + m1, m2);
+    mat::Matrix<int, 3, 2> m3({1, 2, 3, 4, 5, 6});
+    mat::Matrix<int, 3, 2, mat::MatrixOrdering::ColMajor> m4({1, 2, 3, 4, 5, 6});
+    mat::Matrix<int, 3, 2> m5({2, 6, 5, 9, 8, 12});
+    EXPECT_EQ(m3 + m4, m5);
+  }
+
+  TEST(OperationTest, MatrixSubstractionRowColDifferent){
+    mat::Matrix<int, 2, 2> m0({1, 2, 3, 4});
+    mat::Matrix<int, 2, 2, mat::MatrixOrdering::ColMajor> m1({1, 2, 3, 4});
+    mat::Matrix<int, 2, 2> m2({0, -1, 1, 0});
+    EXPECT_EQ(m0 - m1, m2);
+    mat::Matrix<int, 3, 2> m3({1, 2, 3, 4, 5, 6});
+    mat::Matrix<int, 3, 2, mat::MatrixOrdering::ColMajor> m4({1, 2, 3, 4, 5, 6});
+    mat::Matrix<int, 3, 2> m5({0, -2, 1, -1, 2, 0});
+    EXPECT_EQ(m3 - m4, m5);
+  }
+
+  TEST(OperationTest, MatrixMultiplicationRowColDifferent){
+    mat::Matrix<int, 2, 2> m0({1, 2, 3, 4});
+    mat::Matrix<int, 2, 2, mat::MatrixOrdering::ColMajor> m1({1, 2, 3, 4});
+    mat::Matrix<int, 2, 2> m2({5, 11, 11, 25});
+    EXPECT_EQ(m0 * m1, m2);
+  }
+
+  TEST(OperationTest, MatrixMultiplicationDifferentSize){
+    mat::Matrix<int, 4, 2> m0({1, 2, 3, 4, 5, 6, 7, 8});
+    mat::Matrix<int, 2, 4> m1({1, 2, 3, 4, 5, 6, 7, 8});
+    mat::Matrix<int, 4, 4> m2({11, 14, 17, 20, 23, 30, 37, 44, 35, 46, 57, 68, 47, 62, 77, 92});
+    EXPECT_EQ(m0 * m1, m2);
+  }
+
  TEST(Constexpr, testConstexpr) {
     constexpr mat::Matrix<int, 2, 2> m1;
     constexpr mat::Matrix<int, 2, 2> m2({1, 2, 3, 4});
