@@ -78,13 +78,16 @@ namespace mat {
       }
     }
 
-    // // Conversion constructor
-    // constexpr Matrix(const Matrix<Type, Rows, Cols, Order>& other) {
-    // }
+     // Conversion constructor
+     template<MatrixOrdering otherOrder>
+     constexpr Matrix(const Matrix<Type, Rows, Cols, otherOrder>& other) {
+        this = other;
+     }
 
     // Affectation from a matrix with different ordering
-    constexpr auto& operator=(const Matrix<Type, Rows, Cols, Order>& other) {
-      if (order != other.Order) {
+    template<MatrixOrdering otherOrder>
+    constexpr auto& operator=(const Matrix<Type, Rows, Cols, otherOrder>& other) {
+      if (order != otherOrder) {
         if (order == MatrixOrdering::RowMajor) {
           for (int i = 0; i < Rows; i++) {
             for (int j = 0; j < Cols; j++) {
@@ -109,9 +112,24 @@ namespace mat {
       return *this;
     }
 
-    // // Retrun the transposed matrix
-    // constexpr Matrix<Type, Cols, Rows, Order> transpose() {
-    // }
+     // Retrun the transposed matrix
+     constexpr Matrix<Type, Cols, Rows, Order> transpose() {
+      Matrix<Type, Cols, Rows, Order> result;
+      if (Order == MatrixOrdering::RowMajor) {
+        for (int i = 0; i < Rows; i++) {
+          for (int j = 0; j < Cols; j++) {
+            result.Elements[j][i] = Elements[i][j];
+          }
+        }
+      } else {
+        for (int i = 0; i < Cols; i++) {
+          for (int j = 0; j < Rows; j++) {
+            result.Elements[i][j] = Elements[i][j];
+          }
+        }
+      }
+      return result;
+     }
 
     // Get the value at specified row and col
     constexpr const Type& operator() (int row, int col) const {
@@ -133,7 +151,6 @@ namespace mat {
      // Addition - in place
      template<typename OtherType, MatrixOrdering otherOrder>
      auto& operator+=(const Matrix<OtherType, Rows, Cols, otherOrder>& other) {
-       static_assert(Rows==other.Rows && Cols==other.Cols, "Matrix sizes must match");
 
        if (Order == MatrixOrdering::RowMajor) {
          for (int i = 0; i < Rows; i++) {
@@ -154,7 +171,6 @@ namespace mat {
      // Addition - classic
      template<typename OtherType, MatrixOrdering otherOrder>
      constexpr Matrix<std::common_type_t<Type, OtherType>, Rows, Cols, Order> operator+(const Matrix<OtherType, Rows, Cols, otherOrder>& other) const {
-       static_assert(Rows==other.Rows && Cols==other.Cols, "Matrix sizes must match");
 
        Matrix<std::common_type_t<Type, OtherType>, Rows, Cols, Order> result;
 
@@ -177,7 +193,6 @@ namespace mat {
      // Substration - in place
      template<typename OtherType, MatrixOrdering otherOrder>
      auto& operator-=(const Matrix<OtherType, Rows, Cols, otherOrder>& other) {
-       static_assert(Rows==other.Rows && Cols==other.Cols, "Matrix sizes must match");
 
        if (Order == MatrixOrdering::RowMajor) {
          for (int i = 0; i < Rows; i++) {
@@ -198,7 +213,6 @@ namespace mat {
      // Substraction - classic
      template<typename OtherType, MatrixOrdering otherOrder>
      constexpr Matrix<std::common_type_t<Type, OtherType>, Rows, Cols, Order> operator-(const Matrix<OtherType, Rows, Cols, otherOrder>& other) const {
-       static_assert(Rows==other.Rows && Cols==other.Cols, "Matrix sizes must match");
 
        Matrix<std::common_type_t<Type, OtherType>, Rows, Cols, Order> result;
        if (Order == MatrixOrdering::RowMajor) {
@@ -227,8 +241,7 @@ namespace mat {
      // Product - classic
      template<typename OtherType, int OtherCols, MatrixOrdering otherOrder>
      constexpr Matrix<std::common_type_t<Type, OtherType>, Rows, OtherCols, Order> operator*(const Matrix<OtherType, Cols, OtherCols, otherOrder>& other) const {
-        static_assert(Rows == other.Cols, "Matrix sizes must match");
-      
+
         if(order == MatrixOrdering::RowMajor) {
           Matrix<std::common_type_t<Type, OtherType>, Rows, other.Cols> result;
 
