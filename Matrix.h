@@ -38,7 +38,7 @@ namespace mat {
           }
       }
 
-      std::array<std::array<Type, chooseCol()>, chooseRow()> Elements;
+      std::array<std::array<Type, ColCount>, RowCount> Elements;
 
     // Default constructor
     constexpr Matrix() : Elements{} {
@@ -49,9 +49,9 @@ namespace mat {
           }
         }
       } else {
-        for (int i = 0; i < Cols; i++) {
-          for (int j = 0; j < Rows; j++) {
-            Elements[i][j] = 0;
+        for (int i = 0; i < Rows; i++) {
+          for (int j = 0; j < Cols; j++) {
+            Elements[j][i] = 0;
           }
         }
       }
@@ -64,44 +64,63 @@ namespace mat {
       if (Order == MatrixOrdering::RowMajor) {
         for (int i = 0; i < Rows; i++) {
           for (int j = 0; j < Cols; j++) {
-            Elements[i][j] = data[index];
-            ++index;
+            Elements[i][j] = data[index++];
           }
         }
       } else {
-        for (int i = 0; i < Cols; i++) {
-          for (int j = 0; j < Rows; j++) {
-            Elements[i][j] = data[index];
-            ++index;
+          for(int i = 0; i < Cols; i++) {
+              for(int j = 0; j < Rows; j++) {
+                  Elements[j][i] = data[index++];
+              }
           }
-        }
       }
     }
 
      // Conversion constructor
      template<MatrixOrdering otherOrder>
-     constexpr explicit Matrix(const Matrix<Type, Rows, Cols, otherOrder>& other) {
-        this = other;
+     constexpr explicit Matrix(const Matrix<Type, Rows, Cols, otherOrder>& other): Elements{} {
+         if (order != otherOrder) {
+             auto it = other.begin();
+             if(order == MatrixOrdering::RowMajor) {
+                 for(int i = 0; i < Rows; i++) {
+                     for(int j = 0; j < Cols; j++) {
+                         Elements[i][j] = *it++;
+                     }
+                 }
+             } else {
+                 for(int i = 0; i < Cols; i++) {
+                     for(int j = 0; j < Rows; j++) {
+                         Elements[j][i] = *it++;
+                     }
+                 }
+             }
+         } else {
+             for (int i = 0; i < Rows; i++) {
+                 for (int j = 0; j < Cols; j++) {
+                     Elements[i][j] = other.Elements[i][j];
+                 }
+             }
+         }
      }
 
     // Affectation from a matrix with different ordering
     template<MatrixOrdering otherOrder>
     constexpr auto& operator=(const Matrix<Type, Rows, Cols, otherOrder>& other) {
       if (order != otherOrder) {
-        if (order == MatrixOrdering::RowMajor) {
-          for (int i = 0; i < Rows; i++) {
-            for (int j = 0; j < Cols; j++) {
-              Elements[i][j] = other.Elements[j][i];
-            }
+          auto it = other.begin();
+          if(order == MatrixOrdering::RowMajor) {
+              for(int i = 0; i < Rows; i++) {
+                  for(int j = 0; j < Cols; j++) {
+                      Elements[i][j] = *it++;
+                  }
+              }
+          } else {
+              for(int i = 0; i < Cols; i++) {
+                  for(int j = 0; j < Rows; j++) {
+                      Elements[j][i] = *it++;
+                  }
+              }
           }
-        } else {
-          for (int i = 0; i < Cols; i++) {
-            for (int j = 0; j < Rows; j++) {
-              Elements[i][j] = other.Elements[i][j];
-            }
-          }
-        }
-        
       } else {
         for (int i = 0; i < Rows; i++) {
           for (int j = 0; j < Cols; j++) {
@@ -113,32 +132,39 @@ namespace mat {
     }
 
      // Retrun the transposed matrix
-     constexpr Matrix<Type, Cols, Rows, Order> transpose() {
-//      Matrix<Type, Cols, Rows, Order> result;
-//      if (Order == MatrixOrdering::RowMajor) {
-//        for (int i = 0; i < Rows; i++) {
-//          for (int j = 0; j < Cols; j++) {
-//            result.Elements[j][i] = Elements[i][j];
-//          }
-//        }
-//      } else {
-//        for (int i = 0; i < Cols; i++) {
-//          for (int j = 0; j < Rows; j++) {
-//            result.Elements[i][j] = Elements[i][j];
-//          }
-//        }
-//      }
-//      return result;
-        return *this;
+     constexpr Matrix<Type, Rows, Cols, Order> transpose() {
+         Matrix<Type, Cols, Rows, Order> result;
+         if (Order == MatrixOrdering::RowMajor) {
+             for (int i = 0; i < Rows; i++) {
+                 for (int j = 0; j < Cols; j++) {
+                     result.Elements[i][j] = Elements[j][i];
+                 }
+             }
+         } else {
+             for (int i = 0; i < Rows; i++) {
+                 for (int j = 0; j < Cols; j++) {
+                     result.Elements[j][i] = Elements[i][j];
+
+                 }
+             }
+         }
+
+         return result;
      }
+
+     constexpr void print() {
+         for (int i = 0; i < Rows; i++) {
+             for (int j = 0; j < Cols; j++) {
+                 std::cout << Elements[i][j] << " ";
+             }
+             std::cout << std::endl;
+         }
+     }
+
 
     // Get the value at specified row and col
     constexpr const Type& operator() (int row, int col) const {
-      if(Order == MatrixOrdering::RowMajor) {
         return Elements[row][col];
-      } else {
-        return Elements[col][row];
-      }
     }
 
     constexpr Type& operator() (int row, int col) {
@@ -152,21 +178,8 @@ namespace mat {
      // Addition - in place
      template<typename OtherType, MatrixOrdering otherOrder>
      auto& operator+=(const Matrix<OtherType, Rows, Cols, otherOrder>& other) {
-
-       if (Order == MatrixOrdering::RowMajor) {
-         for (int i = 0; i < Rows; i++) {
-           for (int j = 0; j < Cols; j++) {
-             Elements[i][j] += other(i, j);
-           }
-         }
-       } else {
-         for (int i = 0; i < Cols; i++) {
-           for (int j = 0; j < Rows; j++) {
-             Elements[i][j] += other(i, j);
-           }
-         }
-       }
-       return *this;
+         *this = *this+other;
+         return *this;
      }
 
      // Addition - classic
@@ -175,60 +188,30 @@ namespace mat {
 
        Matrix<std::common_type_t<Type, OtherType>, Rows, Cols, Order> result;
 
-       if (Order == MatrixOrdering::RowMajor) {
          for (int i = 0; i < Rows; i++) {
-           for (int j = 0; j < Cols; j++) {
-             result(i, j) = Elements[i][j] + other(i, j);
-           }
+             for (int j = 0; j < Cols; j++) {
+                 result(i, j) = Elements[i][j] + other(i, j);
+             }
          }
-       } else {
-         for (int i = 0; i < Cols; i++) {
-           for (int j = 0; j < Rows; j++) {
-             result(i, j) = Elements[i][j] + other(i, j);
-           }
-         }
-       }
        return result;
      }
 
      // Substration - in place
      template<typename OtherType, MatrixOrdering otherOrder>
      auto& operator-=(const Matrix<OtherType, Rows, Cols, otherOrder>& other) {
-
-       if (Order == MatrixOrdering::RowMajor) {
-         for (int i = 0; i < Rows; i++) {
-           for (int j = 0; j < Cols; j++) {
-             Elements[i][j] -= other(i, j);
-           }
-         }
-       } else {
-         for (int i = 0; i < Cols; i++) {
-           for (int j = 0; j < Rows; j++) {
-             Elements[i][j] -= other(i, j);
-           }
-         }
-       }
-       return *this;
+        *this = *this-other;
+        return *this;
      }
 
      // Substraction - classic
      template<typename OtherType, MatrixOrdering otherOrder>
      constexpr Matrix<std::common_type_t<Type, OtherType>, Rows, Cols, Order> operator-(const Matrix<OtherType, Rows, Cols, otherOrder>& other) const {
-
-       Matrix<std::common_type_t<Type, OtherType>, Rows, Cols, Order> result;
-       if (Order == MatrixOrdering::RowMajor) {
+        Matrix<std::common_type_t<Type, OtherType>, Rows, Cols, Order> result;
          for (int i = 0; i < Rows; i++) {
-           for (int j = 0; j < Cols; j++) {
-             result(i, j) = Elements[i][j] - other(i, j);
-           }
+             for (int j = 0; j < Cols; j++) {
+                 result(i, j) = Elements[i][j] - other(i, j);
+             }
          }
-       } else {
-         for (int i = 0; i < Cols; i++) {
-           for (int j = 0; j < Rows; j++) {
-             result(i, j) = Elements[i][j] - other(i, j);
-           }
-         }
-       }
        return result;
      }
 
@@ -263,18 +246,18 @@ namespace mat {
      // Equality
      template<typename OtherType, int OtherRows, int OtherCols, MatrixOrdering otherOrder>
      constexpr bool operator==(const Matrix<OtherType, OtherRows, OtherCols, otherOrder>& other) const {
-       if (Rows != other.Rows || Cols != other.Cols) {
+       if (Rows != OtherRows || Cols != OtherCols) {
          return false;
        }
-
+       std::cout << Rows << " " << Cols << std::endl;
        for (int i = 0; i < Rows; i++) {
          for (int j = 0; j < Cols; j++) {
-           if (Elements[i][j] != other.Elements[i][j]) {
+             std::cout << Elements[i][j] << " " << other(i, j) << std::endl;
+           if (Elements[i][j] != other(i, j)) {
              return false;
            }
          }
        }
-
        return true;
      }
 
@@ -681,7 +664,11 @@ namespace mat {
    // Convert the matrix to the opposite ordering
    template<typename Type, int Rows, int Cols, MatrixOrdering Order>
    constexpr auto convert(const Matrix<Type, Rows, Cols, Order>& mat) {
-     return Matrix<Type, Cols, Rows, Order>{mat};
+     if(Order == MatrixOrdering::RowMajor) {
+       return Matrix<Type, Cols, Rows, MatrixOrdering::ColMajor>(mat);
+     } else {
+       return Matrix<Type, Rows, Cols, MatrixOrdering::RowMajor>(mat);
+     }
    }
 
   // Retrun the identity matrix
