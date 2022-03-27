@@ -198,13 +198,15 @@ TEST(CreationAdnGetters, MatrixCreation) {
     EXPECT_EQ((mat::identity<int, 4>()), i1);
  }
 
- TEST(TransposedMatrixTest, Transposed){
+TEST(TransposedMatrixTest, Transposed){
     mat::Matrix<int, 2, 2, mat::MatrixOrdering::RowMajor> m0({1, 2, 3, 4});
     mat::Matrix<int, 2, 2, mat::MatrixOrdering::ColMajor> m1({1, 3, 2, 4});
     EXPECT_EQ(m0.transpose(), m1);
+    EXPECT_EQ(m1.transpose(), m0);
     mat::Matrix<int, 4, 4, mat::MatrixOrdering::RowMajor> m2({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
     mat::Matrix<int, 4, 4, mat::MatrixOrdering::ColMajor> m3({1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 16});
     EXPECT_EQ(m2.transpose(), m3);
+    EXPECT_EQ(m3.transpose(), m2);
  }
 
 
