@@ -41,7 +41,7 @@ namespace mat {
       std::array<std::array<Type, chooseCol()>, chooseRow()> Elements;
 
     // Default constructor
-    constexpr Matrix() {
+    constexpr Matrix() : Elements{} {
       if (Order == MatrixOrdering::RowMajor) {
         for (int i = 0; i < Rows; i++) {
           for (int j = 0; j < Cols; j++) {
@@ -59,7 +59,7 @@ namespace mat {
 
     // Initialisation constructor
     template<int DataLength>
-    constexpr Matrix(const Type(&data)[DataLength]) {
+    constexpr explicit Matrix(const Type(&data)[DataLength]): Elements{} {
       int index = 0;
       if (Order == MatrixOrdering::RowMajor) {
         for (int i = 0; i < Rows; i++) {
@@ -80,7 +80,7 @@ namespace mat {
 
      // Conversion constructor
      template<MatrixOrdering otherOrder>
-     constexpr Matrix(const Matrix<Type, Rows, Cols, otherOrder>& other) {
+     constexpr explicit Matrix(const Matrix<Type, Rows, Cols, otherOrder>& other) {
         this = other;
      }
 
@@ -114,21 +114,22 @@ namespace mat {
 
      // Retrun the transposed matrix
      constexpr Matrix<Type, Cols, Rows, Order> transpose() {
-      Matrix<Type, Cols, Rows, Order> result;
-      if (Order == MatrixOrdering::RowMajor) {
-        for (int i = 0; i < Rows; i++) {
-          for (int j = 0; j < Cols; j++) {
-            result.Elements[j][i] = Elements[i][j];
-          }
-        }
-      } else {
-        for (int i = 0; i < Cols; i++) {
-          for (int j = 0; j < Rows; j++) {
-            result.Elements[i][j] = Elements[i][j];
-          }
-        }
-      }
-      return result;
+//      Matrix<Type, Cols, Rows, Order> result;
+//      if (Order == MatrixOrdering::RowMajor) {
+//        for (int i = 0; i < Rows; i++) {
+//          for (int j = 0; j < Cols; j++) {
+//            result.Elements[j][i] = Elements[i][j];
+//          }
+//        }
+//      } else {
+//        for (int i = 0; i < Cols; i++) {
+//          for (int j = 0; j < Rows; j++) {
+//            result.Elements[i][j] = Elements[i][j];
+//          }
+//        }
+//      }
+//      return result;
+        return *this;
      }
 
     // Get the value at specified row and col
@@ -677,10 +678,11 @@ namespace mat {
      return VecC<Type, Rows>(data);
    }
 
-  // // Convert the matrix to the opposite ordering
-  // template<typename Type, int Rows, int Cols, MatrixOrdering Order>
-  // constexpr auto convert(const Matrix<Type, Rows, Cols, Order>& mat) {
-  // }
+   // Convert the matrix to the opposite ordering
+   template<typename Type, int Rows, int Cols, MatrixOrdering Order>
+   constexpr auto convert(const Matrix<Type, Rows, Cols, Order>& mat) {
+     return Matrix<Type, Cols, Rows, Order>{mat};
+   }
 
   // Retrun the identity matrix
   template<typename Type, int Size>
