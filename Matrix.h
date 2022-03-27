@@ -22,21 +22,6 @@ namespace mat {
     // Matrix order
     static constexpr MatrixOrdering Order = order;
 
-    constexpr static int chooseRow() {
-          if constexpr (order == MatrixOrdering::RowMajor) {
-              return RowCount;
-          } else {
-              return ColCount;
-          }
-      }
-
-      constexpr static int chooseCol() {
-          if constexpr (order == MatrixOrdering::RowMajor) {
-              return ColCount;
-          } else {
-              return RowCount;
-          }
-      }
 
       std::array<std::array<Type, ColCount>, RowCount> Elements;
 
@@ -225,7 +210,6 @@ namespace mat {
      // Product - classic
      template<typename OtherType, int OtherCols, MatrixOrdering otherOrder>
      constexpr Matrix<std::common_type_t<Type, OtherType>, Rows, OtherCols, Order> operator*(const Matrix<OtherType, Cols, OtherCols, otherOrder>& other) const {
-
         if(order == MatrixOrdering::RowMajor) {
           Matrix<std::common_type_t<Type, OtherType>, Rows, other.Cols> result;
 
@@ -249,10 +233,8 @@ namespace mat {
        if (Rows != OtherRows || Cols != OtherCols) {
          return false;
        }
-       std::cout << Rows << " " << Cols << std::endl;
        for (int i = 0; i < Rows; i++) {
          for (int j = 0; j < Cols; j++) {
-             std::cout << Elements[i][j] << " " << other(i, j) << std::endl;
            if (Elements[i][j] != other(i, j)) {
              return false;
            }

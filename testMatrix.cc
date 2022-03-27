@@ -112,8 +112,6 @@ TEST(CreationAdnGetters, MatrixConversionConstructor){
    EXPECT_EQ(i, 100);
  }
 
-
-
  TEST(Iterator, MatrixConstIterator){
     const mat::Matrix<int, 2, 2> m0;
     int i = 0;
@@ -146,7 +144,20 @@ TEST(CreationAdnGetters, MatrixConversionConstructor){
 
  TEST(Affectation, ConversionOrder) {
     mat::Matrix<int, 2, 2, mat::MatrixOrdering::ColMajor> m0 ({1, 2, 3, 4});
+    mat::Matrix<int, 2, 2> m1;
+    m1 = m0;
+    EXPECT_EQ(m1(0, 0), 1);
+    EXPECT_EQ(m1(0, 1), 2);
+    EXPECT_EQ(m1(1, 0), 3);
+    EXPECT_EQ(m1(1, 1), 4);
 
+    mat::Matrix<int, 2, 2> m2 ({1, 2, 3, 4});
+    mat::Matrix<int, 2, 2, mat::MatrixOrdering::ColMajor> m3;
+    m3 = m2;
+    EXPECT_EQ(m3(0, 0), 1);
+    EXPECT_EQ(m3(0, 1), 2);
+    EXPECT_EQ(m3(1, 0), 3);
+    EXPECT_EQ(m3(1, 1), 4);
 }
 
 
